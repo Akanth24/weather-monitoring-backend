@@ -44,14 +44,14 @@ export class EmailService {
     }
   }
 
-   async sendMailTest(mail: string,msg: string) {
+   async sendMailTest(mail: string,sub:string,msg: string) {
     this.logger.warn(`ALERT! Test message from nodemailer library`);
 
     // Example email notification logic
     const mailOptions = {
       from: emailUser,
       to: mail, // Replace with the recipient's email
-      subject: `Test message from nodemailer library`,
+      subject: sub,
       text: msg,
     };
 

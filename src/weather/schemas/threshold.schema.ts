@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 
 export type ThresholdDocument = Threshold & Document;
 
-@Schema()
+@Schema({ timestamps: true })  // Add timestamps option here
 export class Threshold {
   @Prop({ required: true })
   city: string;
@@ -23,6 +23,16 @@ export class Threshold {
 
   @Prop({ required: true })
   email: string;  // Email address to send alert
+
+  // Unique compound index for city, temperatureThreshold, and email
+  static get schemaOptions() {
+    return { 
+      indexes: [{ fields: { city: 1, temperatureThreshold: 1, email: 1 }, options: { unique: true } }]
+    };
+  }
 }
 
 export const ThresholdSchema = SchemaFactory.createForClass(Threshold);
+
+// Add unique index for city, temperatureThreshold, and email
+ThresholdSchema.index({ city: 1, temperatureThreshold: 1, email: 1 }, { unique: true });

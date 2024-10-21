@@ -1,5 +1,5 @@
 // src/weather/weather.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import { ConfigService } from '../config/config.service';
 import { Cron } from '@nestjs/schedule';
@@ -48,6 +48,21 @@ export class WeatherService {
     await this.fetchWeatherData();
     await this.calculateDailyAggregates();
     await this.checkThresholds();  // Check thresholds after fetching data
+  }
+
+  async getOpenWeatherData(city: string){
+    try {
+      const response = await axios.get(`${openWeatherApiUrl}/weather`, {
+        params: {
+          q: city,
+          appid: openWeatherApiKey,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error fetching data for ${city}: ${error.message}`);
+    }
   }
 
   // Fetch weather data from OpenWeatherMap API using axios
@@ -198,8 +213,22 @@ export class WeatherService {
 
   // Method to create threshold
   async createThreshold(city: string, temperatureThreshold: number, email: string, weatherCondition?: string) {
-    const threshold = new this.thresholdModel({ city, temperatureThreshold, weatherCondition, email });
-    return await threshold.save();
+    try {
+      const threshold = new this.thresholdModel({
+        city,
+        temperatureThreshold,
+        weatherCondition,
+        email,
+      });
+      return await threshold.save();
+    } catch (error) {
+      if (error.code === 11000) {  // MongoDB duplicate key error code
+        throw new BadRequestException(
+          `A threshold for city "${city}", temperature "${temperatureThreshold}", and email "${email}" already exists.`,
+        );
+      }
+      throw error;
+    }
   }
 
   // Method to check for threshold breaches
@@ -234,8 +263,41 @@ export class WeatherService {
     return await this.emailService.sendEmailAlert(city, temperature, mailTo);  // Call the email service to send alert
   }
 
-  async sendMailTest(mailTo: string,msg: string){
-    return await this.emailService.sendMailTest(mailTo,msg); 
+   // Method to get all thresholds
+   async getAllThresholds(): Promise<ThresholdDocument[]> {
+    return await this.thresholdModel.find().exec();
+  }
+
+  // Method to update a threshold by ID
+  async updateThreshold(
+    id: string,
+    city: string,
+    temperatureThreshold: number,
+    email: string,
+    weatherCondition?: string,
+  ): Promise<ThresholdDocument> {
+    const updatedThreshold = await this.thresholdModel.findByIdAndUpdate(
+      id,
+      { city, temperatureThreshold, email, weatherCondition },
+      { new: true }, // Return the updated document
+    );
+    if (!updatedThreshold) {
+      throw new Error(`Threshold with ID ${id} not found.`);
+    }
+    return updatedThreshold;
+  }
+
+  // Method to delete a threshold by ID
+  async deleteThreshold(id: string): Promise<ThresholdDocument> {
+    const deletedThreshold = await this.thresholdModel.findByIdAndDelete(id);
+    if (!deletedThreshold) {
+      throw new Error(`Threshold with ID ${id} not found.`);
+    }
+    return deletedThreshold;
+  }
+
+  async sendMailTest(mailTo: string,sub: string,msg: string){
+    return await this.emailService.sendMailTest(mailTo,sub,msg); 
   }
 
 }
