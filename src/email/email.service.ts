@@ -44,23 +44,4 @@ export class EmailService {
     }
   }
 
-   async sendMailTest(mail: string,sub:string,msg: string) {
-    this.logger.warn(`ALERT! Test message from nodemailer library`);
-
-    // Example email notification logic
-    const mailOptions = {
-      from: emailUser,
-      to: mail, // Replace with the recipient's email
-      subject: sub,
-      text: msg,
-    };
-
-    try {
-      this.logger.log('Alert email sent successfully!');
-      return await this.transporter.sendMail(mailOptions);
-
-    } catch (error) {
-      this.logger.error('Error sending alert email:', error);
-    }
-  }
 }

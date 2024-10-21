@@ -50,7 +50,7 @@ export class WeatherService {
     await this.checkThresholds();  // Check thresholds after fetching data
   }
 
-  async getOpenWeatherData(city: string){
+  async getOpenWeatherData(city: string) {
     try {
       const response = await axios.get(`${openWeatherApiUrl}/weather`, {
         params: {
@@ -195,20 +195,71 @@ export class WeatherService {
   }
 
   // Get weather history for the past 'n' days for a specific city
-  async getWeatherHistory(city: string, days: number): Promise<DailySummaryDocument[]> {
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
+  async getWeatherHistoryByDate(city: string, date: string): Promise<DailySummaryDocument[]> {
+    // Fetch the history based on city and date, sorted by creation time (latest first)
     const history = await this.dailySummaryModel.find({
       city,
-      date: { $gte: startDate.toISOString().slice(0, 10), $lte: endDate.toISOString().slice(0, 10) },
-    }).sort({ date: -1 });
-
+      date: { $eq: date },
+    }).sort({ createdAt: -1 }); // Sort by 'createdAt' to get the latest records
+  
+    // Throw an error if no records are found
     if (history.length === 0) {
-      throw new Error(`No weather history found for city: ${city} in the past ${days} days.`);
+      throw new Error(`No weather history found for city: ${city} on date: ${date}.`);
     }
+  
     return history;
+  }
+
+  // Get weather history for the past 'n' days for a specific city latest of each day
+  async getLatestWeatherHistory(days: number = 1, city?: string): Promise<any> {
+    const today = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(today.getDate() - days);
+
+    const matchQuery: any = {
+      createdAt: { $gte: pastDate },
+    };
+
+    if (city) {
+      matchQuery.city = city;
+    }
+
+    this.logger.debug(`Fetching weather history for ${city ? city : 'all cities'} from ${pastDate.toISOString()} to ${today.toISOString()}`);
+    
+    try {
+      const latestWeatherHistory = await this.dailySummaryModel.aggregate([
+        {
+          $match: matchQuery,
+        },
+        {
+          $sort: {
+            city: 1,
+            date: 1,
+            createdAt: -1,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              city: '$city',
+              date: '$date',
+            },
+            latestRecord: { $first: '$$ROOT' },
+          },
+        },
+        {
+          $replaceRoot: {
+            newRoot: '$latestRecord',
+          },
+        },
+      ]);
+
+      this.logger.debug(`Retrieved ${latestWeatherHistory.length} records`);
+      return latestWeatherHistory;
+    } catch (error) {
+      this.logger.error('Error retrieving weather history', error);
+      throw error; // Rethrow or handle the error as needed
+    }
   }
 
   // Method to create threshold
@@ -257,14 +308,14 @@ export class WeatherService {
   }
 
   // Method to trigger alert
-  private async triggerAlert(city: string, temperature: number,mailTo: string) {
+  private async triggerAlert(city: string, temperature: number, mailTo: string) {
     this.logger.warn(`ALERT! ${city} temperature has exceeded threshold: ${temperature}°C`);
     // Implement email notification logic here (not included for brevity)
     return await this.emailService.sendEmailAlert(city, temperature, mailTo);  // Call the email service to send alert
   }
 
-   // Method to get all thresholds
-   async getAllThresholds(): Promise<ThresholdDocument[]> {
+  // Method to get all thresholds
+  async getAllThresholds(): Promise<ThresholdDocument[]> {
     return await this.thresholdModel.find().exec();
   }
 
@@ -294,10 +345,6 @@ export class WeatherService {
       throw new Error(`Threshold with ID ${id} not found.`);
     }
     return deletedThreshold;
-  }
-
-  async sendMailTest(mailTo: string,sub: string,msg: string){
-    return await this.emailService.sendMailTest(mailTo,sub,msg); 
   }
 
 }
