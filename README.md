@@ -1,4 +1,4 @@
-# AST Rule Engine Backend
+# Weather Monitoring Backend
 
 This is the backend service for the Weather Monitoring Application. It is built using the Nest.js framework and MongoDB Atlas for storing weather history.
 
@@ -25,7 +25,9 @@ Before you begin, ensure you have met the following requirements:
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/weather-monitoring-backend.git
+git clone https://github.com/Akanth24/weather-monitoring-backend.git
+```
+```bash
 cd weather-monitoring-backend
 ```
 ### 2. Install dependencies
@@ -45,11 +47,30 @@ The backend should now be running on `http://localhost:3000`.
 
 ## Project Description
 
-This project is a simple 3-tier Rule Engine application that allows users to define and evaluate conditional rules based on attributes like age, department, salary, etc. The system uses an Abstract Syntax Tree (AST) to represent these rules. The backend has the APIs and database access functionalities for the following:
+#### Real-Time Data Processing System for Weather Monitoring
+The backend is responsible for real-time weather data retrieval, processing, and storing summaries in MongoDB Atlas. It allows users to set and manage custom alert thresholds for weather conditions, and sends email notifications when these thresholds are breached. Weather data is fetched from the OpenWeatherMap API at 5-minute intervals.
 
-- Create individual rules.
-- Combine multiple rules into a complex rule.
-- Evaluate a rule against a dataset input given by the user.
+#### Features:
+
+**Real-time Weather Data Retrieval:** Continuously fetches weather data for specified metro cities in India (Delhi, Mumbai, Chennai, Bangalore, Kolkata, Hyderabad) from the OpenWeatherMap API every 5 minutes.
+
+**Data Processing and Conversion:** Converts temperature data from Kelvin to Celsius and stores weather data in MongoDB Atlas
+
+**Rollups and Aggregates:**
+Provides daily weather summaries that include:
+  - Average temperature
+  - Maximum temperature
+  - Minimum temperature
+  - Dominant weather condition (e.g., rain, clear skies, etc.)
+  - Average Humidity
+  - Average Wind Speed.
+
+Summaries are stored in MongoDB Atlas for future analysis.
+
+**User-Configurable Alerts:**
+- Users can create, edit, or delete alert thresholds based on weather conditions, such as temperature exceeding 35°C for two consecutive updates.
+
+- Email notifications are sent when thresholds are breached, using Nodemailer.
 
 ## API-Endpoints
 
