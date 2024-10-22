@@ -36,6 +36,10 @@ cd weather-monitoring-backend
 npm install
 ```
 
+### 2. Configure Keys
+
+Configure the OpenWeatherMap API key, MongoDB Atlas connection, and email service credentials in the ``` .env ``` file
+
 ### 3. Run the application
 To run the backend server in development mode:
 
@@ -57,19 +61,17 @@ The backend is responsible for real-time weather data retrieval, processing, and
 **Data Processing and Conversion:** Converts temperature data from Kelvin to Celsius and stores weather data in MongoDB Atlas
 
 **Rollups and Aggregates:**
-Provides daily weather summaries that include:
+- Provides daily weather summaries that include:
   - Average temperature
   - Maximum temperature
   - Minimum temperature
   - Dominant weather condition (e.g., rain, clear skies, etc.)
   - Average Humidity
   - Average Wind Speed.
-
-Summaries are stored in MongoDB Atlas for future analysis.
+- Summaries are stored in MongoDB Atlas for future analysis.
 
 **User-Configurable Alerts:**
 - Users can create, edit, or delete alert thresholds based on weather conditions, such as temperature exceeding 35°C for two consecutive updates.
-
 - Email notifications are sent when thresholds are breached, using Nodemailer.
 
 ## API-Endpoints
