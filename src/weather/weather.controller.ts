@@ -13,15 +13,6 @@ export class WeatherController {
     return this.weatherService.getOpenWeatherData(city);
   }
 
-  // GET latest weather data for a specific city
-  @Get('latest')
-  async getLatestWeatherData(@Query('city') city: string) {
-    if (!city) {
-      throw new BadRequestException('City name is required');
-    }
-    return this.weatherService.getLatestWeatherData(city);
-  }
-
   // GET daily weather summary for a specific city
   @Get('daily-summary')
   async getDailySummary(@Query('city') city: string) {

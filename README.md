@@ -76,132 +76,120 @@ The backend is responsible for real-time weather data retrieval, processing, and
 
 ## API-Endpoints
 
-### 1. Create Rule
+### 1. Get Current Weather Data for a City
 
-Creates an AST (Abstract Syntax Tree) from the provided rule string and stores the rule in the database.
+Retrieves the latest weather data for a specific city from the OpenWeatherMap API.
 
-- URL: /rule/create
-
-- Method: POST
-
-- Request Body:
-
-  ```json
-
-  {
-
-    "rule": "(age > 30 AND department = 'Sales') OR (salary > 50000)"
-
-  }
-
-  ```
-
-### 2. Combine Rules
-
-Combines multiple rules into a single AST using the specified logical operator.
-
-- URL: /rule/combine
-
-- Method: POST
-
-- Request Body:
-
-  ```json
-
-  {
-
-    "rules": [
-
-      "(age > 30 AND department = 'Sales')",
-
-      "(salary > 50000 OR experience > 5)"
-
-    ],
-
-    "operator": "AND"
-
-  }
-
-  ```
-
-
-### 3. Evaluate Rule
-
-Evaluates the given AST with the provided data.
-
-- URL: /rule/evaluate
-
-- Method: POST
-
-- Request Body:
-
-  ```json
-
-  {
-
-    "ast": {
-
-      "type": "operator",
-
-      "left": { ... },
-
-      "right": { ... }
-
-    },
-
-    "data": {
-
-      "age": 35,
-
-      "department": "Sales",
-
-      "salary": 60000,
-
-      "experience": 3
-
-    }
-
-  }
-
-  ```
-
-### 4. Get Existing Rules
-
-Fetches all stored rules from the database.
-
-- URL: /rule/existing
+- URL: /weather/city/:city
 
 - Method: GET
 
+- Parameters:
+  - ```city``` (string, required): The name of the city.
 
-### 5. Update Rule
+### 2. Get Daily Weather Summary
 
-Updates an existing rule based on the provided ID and new rule string.
+Retrieves the daily weather summary for a specific city, including average, maximum, minimum temperatures, dominant weather condition, average humidity, and average wind speed.
 
-- URL: /rule/:id
+- URL: /weather/daily-summary
 
-- Method: PUT
+- Method: GET
+
+- Query Parameters:
+  - ```city``` (string, required): The name of the city.
+
+
+### 3. Get Weather History for a Specific City by Date
+
+Retrieves historical weather data for a specific city and date.
+
+- URL: /weather/history-date
+
+- Method: GET
+
+- Query Parameters:
+  - ```city``` (string, required): The name of the city.
+  - ```date``` (string, required): The date for which the weather history is needed (format: ```YYYY-MM-DD```).
+
+### 4. Get Latest Weather History
+
+Retrieves the latest weather history for a specific city for the specified number of days.
+
+- URL: /weather/latest-history
+
+- Method: GET
+
+- Query Parameters:
+  - ```days``` (number, required): The number of days of weather history to retrieve.
+  - ```city``` (string, required): The name of the city for which the weather history is needed.
+
+
+### 5. Create a New Weather Alert Threshold
+
+Creates a new weather alert threshold for a specific city, based on temperature or weather conditions, and sends email alerts if the threshold is breached.
+
+- URL: /weather/threshold
+
+- Method: POST
 
 - Request Body:
 
   ```json
 
   {
+    "city": "Bangalore",
+    "temperatureThreshold": 35,
+    "email": "user@example.com",
+    "weatherCondition": "Rain"
+  }
 
-    "rule": "(age <= 40 AND department = 'HR')"
 
+  ```
+
+
+### 6. Get All Weather Alert Thresholds
+
+Retrieves all existing weather alert thresholds.
+
+- URL: /weather/thresholds
+
+- Method: GET
+
+### 7. Update a Weather Alert Threshold
+
+Updates an existing weather alert threshold by its ID.
+
+- URL: /weather/threshold/:id
+
+- Method: PATCH 
+
+- Parameters:
+  - ```id``` (string, required): The ID of the threshold to be updated.
+
+- Request Body:
+
+  ```json
+
+  {
+    "city": "Kolkata",
+    "temperatureThreshold": 30,
+    "email": "newuser@example.com",
+    "weatherCondition": "Clear"
   }
 
   ```
 
 
-### 6. Delete Rule
+### 8. Delete a Weather Alert Threshold
 
-Deletes a rule from the database based on the provided ID.
+Deletes a weather alert threshold by its ID.
 
-- URL: /rule/:id
+- URL: /weather/threshold/:id
 
-- Method: DELETE
+- Method: DELETE 
+
+- Parameters:
+  - ```id``` (string, required): The ID of the threshold to be deleted.
 
 
 

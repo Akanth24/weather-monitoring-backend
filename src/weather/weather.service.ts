@@ -175,15 +175,6 @@ export class WeatherService {
     return Object.keys(conditionCount).reduce((a, b) => conditionCount[a] > conditionCount[b] ? a : b);
   }
 
-  // Get the latest weather data for a specific city
-  async getLatestWeatherData(city: string): Promise<WeatherDataDocument> {
-    const weatherData = await this.weatherModel.findOne({ city }).sort({ timestamp: -1 });
-    if (!weatherData) {
-      throw new Error(`No weather data found for city: ${city}`);
-    }
-    return weatherData;
-  }
-
   // Get the daily summary for a specific city
   async getDailySummary(city: string): Promise<DailySummaryDocument> {
     const today = new Date().toISOString().slice(0, 10);
