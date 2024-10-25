@@ -26,6 +26,10 @@ export class WeatherData {
 
   @Prop({ required: true })
   timestamp: Date;
+
+  // Index to auto-delete documents after 7 days
+  @Prop({ default: Date.now, expires: 604800 }) // 604800 seconds = 7 days
+  createdAt: Date;
 }
 
 export const WeatherDataSchema = SchemaFactory.createForClass(WeatherData);
