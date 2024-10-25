@@ -36,11 +36,11 @@ cd weather-monitoring-backend
 npm install
 ```
 
-### 2. Configure Keys
+### 3. Configure Keys
 
 Configure the OpenWeatherMap API key, MongoDB Atlas connection, and email service credentials in the ``` .env ``` file
 
-### 3. Run the application
+### 4. Run the application
 To run the backend server in development mode:
 
 ```bash
